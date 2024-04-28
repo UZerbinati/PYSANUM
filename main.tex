@@ -13,6 +13,9 @@
 \usepackage{caption}
 \usepackage{tikz}
 \usepackage{tikz-cd}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.12}
+
 \captionsetup[figure]{labelformat=empty}
 \mathtoolsset{showonlyrefs}
 \beamertemplatenavigationsymbolsempty
@@ -213,15 +216,15 @@
 \title[Helmholtz]{Quasi-optimality of FEMs for the Helmholtz equation}
 \author%
 {%
-	\sc{T.~Van~Beeck$^\dag$}, \underline{\sc{U.~Zerbinati}}$^*$\\
+	\sc{T.~van~Beeck$^\dag$}, \underline{\sc{U.~Zerbinati}}$^*$\\
 }
 \institute%
 {%
 	* \textit{Mathematical Institute}\\
 	\;\textit{University of Oxford}\\
 	$\newline$
-	$\dag$ \textit{Extreme Computing Research Center}\\
-	\;\textit{King Abdullah University of Science and Technology}\\	
+	$\dag$ \textit{Institute for Numerical and Applied Mathematics}\\
+	\;\textit{University of G\"ottingen}\\	
 }
 
 \date[\textbf{PYSANUM}]{} 
@@ -254,25 +257,25 @@
 		$\newline$
 		\visible<1->{The \textbf{time harmonic solutions} of the wave equation are of the form}
 		\begin{equation}
-			p(\cdot,t) = \Re\left\{ P(\cdot) e^{-i\omega t} \right\},
+			p^{(\delta)}(\cdot,t) = \Re\left\{ P(\cdot) e^{-i\omega t} \right\},
 		\end{equation}
-		\visible<2->{where $P:\Omega\to \mathbb{C}$ and $\omega$ is the \textbf{angular frequency}.}
+		\visible<1->{where $P:\Omega\to \mathbb{C}$ and $\omega$ is the \textbf{angular frequency}.}
 		$\newline$
-		\visible<3->{Substituting this ansatz into the wave equation, we obtain the \textbf{Helmholtz equation}
+		\visible<2->{Substituting this ansatz into the wave equation, we obtain the \textbf{Helmholtz equation}
 		\begin{equation}
 			\begin{aligned}
 				- \Delta P - k^2 P &= F \quad &\text{in } \;\;\;\Omega, \\
 				u &= 0 \quad &\text{on } \partial \Omega,
 			\end{aligned}
 		\end{equation}}
-		\visible<4->{where $k = \omega/c$ is the \textbf{wave number} and $F = \Re\left\{f(\cdot,t)e^{-i\omega t}\right\}$.}
+		\visible<2->{where $k = \omega/c$ is the \textbf{wave number} and $F = \Re\left\{f(\cdot,t)e^{-i\omega t}\right\}$.}
 	\end{frame}
 	\begin{frame}{The weak formulation}
 		$\newline$
 		\visible<1->{The \textbf{weak formulation} of the Helmholtz equation is to find $u \in H^1_0(\Omega)$ such that
 		\begin{equation}
 			\begin{aligned}
-				(\nabla P, \nabla Q)_{L^2} - k^2 (P,Q)_{L^2} &= \langle F,Q \rangle_{L^2} \quad \forall Q \in H^1_0(\Omega),
+				(\nabla P, \nabla Q)_{L^2} - k^2 (P,Q)_{L^2} &= \prescript{}{H^{-1}}{\langle} F,Q \rangle_{H^1_0} \quad \forall Q \in H^1_0(\Omega),
 			\end{aligned}
 		\end{equation}
 		where $(\cdot,\cdot)_{L^2}$ denotes the $L^2$ inner product.}
@@ -409,6 +412,33 @@
 
 		\end{block}
 	\end{frame}
+	\begin{frame}{Lack of coercivity of the Helmholtz problem}
+		$\newline$
+		Consider the function $P(x) = \sin(\pi \omega x)$.
+		\begin{minipage}{0.6\textwidth}
+		\begin{align}
+		&\norm{P}^2_{L^2\left([0,1]\right)}\! =\! \int_0^1 \sin^2(\pi \omega x) = \frac{1}{2}\\
+		&\norm{P'}^2_{L^2\left([0,1]\right)}\! =\! \int_0^1 2\pi\sin(\pi \omega x)\cos(\pi\omega x)
+		\end{align}
+		notice that the last integral vanishes for $\omega \in \mathbb{N}$, on the interval $[0,1]$.
+		\end{minipage}
+		\begin{minipage}{0.35\textwidth}
+			\scalebox{0.5}[0.5]{
+			  \begin{tikzpicture}
+				\begin{axis}[
+				clip=false,
+				xmin=0,xmax=1,
+				%axis lines=left,
+				%axis x line=middle,
+				%axis y line=left,
+				]
+				\addplot[domain=0:1,samples=200,red]{sin(3.14*deg(x))^2}node[right,pos=0.9]{};
+				\addplot[domain=0:1,samples=200,blue]{6.28*sin(3.14*deg(x))*cos(3.14*deg(x))}node[right,pos=0.9]{};
+				\end{axis}
+			\end{tikzpicture}
+			}
+		\end{minipage}
+	\end{frame}
 	\begin{frame}{T-coercive elliptic problems}
 	$\newline$
 	\begin{definition}[T-coercivity]
@@ -461,8 +491,8 @@
 		\begin{itemize}
 			\item<1->[\oxarrow] Let $(\lambda^{(i)},\Phi^{(i)})_{i\in\mathbb{N}}$ be the eigenpairs of the operator $\mathcal{S}$.
 			\item<2->[\oxarrow] The eigenfunctions $(\Phi^{(i)})_{i\in\mathbb{N}}$ form a \textbf{Hilbert basis} of $H^1_0(\Omega)$.
-			\item<3->[\oxarrow] We can expand any $\Phi\in H^1_0(\Omega)$ as $P = \sum_{i\in\mathbb{N}} \Phi^{(i)}( P,\Phi^{(i)})_{H^1}$.
-			\item<4->[\oxarrow]u We will adopt the convection that the $\norm{P}_{H^1}$ is unitary.
+			\item<3->[\oxarrow] We expand any $\Phi^{(i)}\in H^1_0(\Omega)$ as $P = \sum_{i\in\mathbb{N}} \Phi^{(i)}( P,\Phi^{(i)})_{H^1}$.
+			\item<4->[\oxarrow] We will adopt the convection that the $\norm{\Phi^{(i)}}_{H^1}$ is unitary.
 		\end{itemize}
 		\visible<5->{\begin{block}{Spectral decomposition}
 			$S$ is a compact operator on $H^1_0(\Omega)$, hence the eigenvalues $\lambda^{(i)}$ are \textbf{discrete} and \textbf{tend to zero}.
@@ -472,7 +502,7 @@
 
 	\begin{frame}{T-coercivity of the Helmholtz problem}
 	\vspace{1.2cm}
-	$\lVert \Phi^{(i)} \lVert_{H^1} = 1$ implies $\lVert \Phi^{(i)} \lVert_{L^2} = (1+\lambda^{(i)})^{-1/2}$. \\
+	\quad \oxarrow \; $\lVert \Phi^{(i)} \lVert_{H^1} = 1$ implies $\lVert \Phi^{(i)} \lVert_{L^2} = (1+\lambda^{(i)})^{-1/2}$. \\
 	\vspace{-0.5cm}
 	\visible<2->{
 	\begin{align*}
@@ -480,7 +510,7 @@
 		&= \sum_{i\in \N} P^{(i)} (\nabla \Phi^{(i)}, \nabla P)_{L^2} - k^2 P^{(i)} (\Phi^{(i)},P)_{L^2} \\
 		&= \sum_{i\in \N} \lambda^{(i)} P^{(i)} (\Phi^{(i)},P)_{L^2} - k^2 P^{(i)} (\Phi^{(i)},P)_{L^2} \\
 		&= \sum_{i\in \N} \lambda^{(i)} \lvert P^{(i)} \lvert^2 (\Phi^{(i)},\Phi^{(i)})_{L^2} - k^2 \lvert P^{(i)}\lvert^2 (\Phi^{(i)},\Phi^{(i)})_{L^2} \\
-		&=\sum_{i \in \mathbb{N}} \left( \frac{\lambda^{(i)} - k^2}{1-\lambda^{(i)}} \right) P^{(i)} Q^{(i)}
+		&=\sum_{i \in \mathbb{N}} \left( \frac{\lambda^{(i)} - k^2}{1-\lambda^{(i)}} \right) \lvert P^{(i)}\lvert^2
 	\end{align*}
 	}
 	\end{frame}
@@ -518,11 +548,11 @@
 	\begin{frame}{Weak T-coercivity}
 	\vspace{0.5cm}
 	\begin{definition}[weak T-coercivity]
-		A linear operator $A \in L(X)$ is called \textbf{weakly T-coercive} if there exists a bijective operator $T \in L(X)$ and $K \in L(X)$ compact s.t. $AT + K$ is coercive. 
+		A linear operator $A \in L(X)$ is called \textbf{weakly T-coercive} if there exists a bijective operator $T \in L(X)$ and $K \in L(X)$ compact s.t. $T^*A + K$ is coercive. 
 	\end{definition}
 	\begin{itemize}
-	\item<2->[\oxarrow] $A$ is T-coercive if $AT = B$, $B$ bijective
-	\item<3->[\oxarrow] $A$ is weakly T-coercive if $AT = B + K$, $B$ bijective and $K$ compact
+	\item<2->[\oxarrow] $A$ is T-coercive if $T^*A$ is bijective.
+	\item<3->[\oxarrow] $A$ is weakly T-coercive if $T^*A + K$, $B$ bijective and $K$ compact.
 	\end{itemize}
 	
 	\begin{lemma}<4->
@@ -533,9 +563,9 @@
 
 	\begin{frame}{Robin boundary conditions}
 	\vspace{0.8cm}
-	Consider the Helmholtz problem with Robin boundary conditions, i.e. find $u \in H^1(\Omega)$ such that $\mathcal{A}(P,Q) = \prescript{}{H^1(\Omega)}{\langle} f,Q \rangle_{H^1(\Omega)}$ $\forall Q \in X$, where
+	Consider the Helmholtz problem with Robin boundary conditions, i.e. find $u \in H^1(\Omega)$ such that $\mathcal{A}(P,Q) = \prescript{}{H^{-1}}{\langle} f,Q \rangle_{H^1}$ $\forall Q \in X$, where
 	\begin{equation*}
-		\mathcal{A}(P,Q)\!:=\! \underbrace{(\nabla P, \nabla Q)_{L^2} \!- k (P,Q)_{L^2}}_{=: \mathcal{A}_0(P,Q)} {\color{gray!60!black} \!- ik \langle P, Q \rangle_{L^2(\partial \Omega)}}\! = (f , Q)_{L^2}.
+		\mathcal{A}(P,Q)\!:=\! \underbrace{(\nabla P, \nabla Q)_{L^2} \!- k (P,Q)_{L^2}}_{\mathcal{A}_0(P,Q)} {\color{gray!60!black} \!- ik \langle P, Q \rangle_{L^2(\partial \Omega)}}\! = (f , Q)_{L^2}.
 	\end{equation*}
 	\vspace{-0.5cm}
 	\begin{block}<2->{Trace theorem}
@@ -587,7 +617,7 @@
 		\vspace{1cm}
 		Using \textit{Bramble-Hilbert lemma}, we can bound $\psi(X_h)$ as
 		\begin{equation*}
-			C_\mathcal{I} h \norm{Z}_{H^2(\Omega)} \leq \psi(X_h) \leq \left(\frac{\mathcal{G}}{2k^2M^2}\right)^{\frac{1}{2}}.
+			\psi (X_h) \leq C_\mathcal{I} h \norm{Z}_{H^2(\Omega)} \leq \left(\frac{\mathcal{G}}{2k^2M^2}\right)^{\frac{1}{2}}.
 		\end{equation*}
 		\vspace{-0.5cm}
 		\visible<2->{
@@ -616,7 +646,7 @@
 	\oxarrow \ \normalsize If $\mathcal{A}_h$ is uniformly T$_h$-coercive, then the discrete problem is stable and quasi-optimal $\Vert P - P_h \Vert_{X} \lesssim \inf_{P_h \in X_h} \Vert P - Q_h \Vert_{X}.$}
 	\\
 	\visible<3->{
-	\textbf{Note:} it is usually enough to show that 
+	\textbf{Provided} it is usually enough to show that 
 	\vspace{-0.2cm}
 	\begin{equation*}
 		\lim_{h \to 0} \Vert T - T_h \Vert_{X} = 0,
@@ -725,7 +755,7 @@
 	\begin{figure}
 		\visible<2->{
 		\centering
-		\vspace{0.6cm}
+		\vspace{1.cm}
 		\includegraphics[scale=0.4]{Figures/eigenvalue_estimates.png}
 		}
 	\end{figure}
@@ -777,7 +807,7 @@
 		\item[\oxarrow] In the adaptive scheme, we use a \textbf{Babuška--Rheinboldt} estimator to adaptively refine the mesh.
 		\item[\oxarrow] The main idea is to use the \textbf{Babuška--Rheinboldt} estimator not one the desired solution or on a specific eigenfunction, but rather on the first $i_{\ast}+\ell$ eigenfunctions, i.e.
 		\begin{equation*}
-			\eta\! =\! i_{\ast}^{-1}\!\!\sum_{i = 1}^{i_{\ast}+\ell} \sum_{K \in \mathcal{T}_h}\! h^2_K \Vert \Delta e_h^{(i)} \!+\!\lambda_h^{(i)} e_h^{(i)} \Vert^2_{L^2(K)} \!+\! \frac{h_K}{2} \Vert \nabla e_h^{(i)}\! \cdot n \Vert^2_{L^2(\partial K \setminus \partial \Omega)}.
+			\eta_K\! =\! i_{\ast}^{-1}\!\!\sum_{i = 1}^{i_{\ast}+\ell}\! h^2_K \Vert \Delta e_h^{(i)} \!+\!\lambda_h^{(i)} e_h^{(i)} \Vert^2_{L^2(K)} \!+\! \frac{h_K}{2} \Vert \nabla e_h^{(i)}\! \cdot n \Vert^2_{L^2(\partial K \setminus \partial \Omega)}.
 		\end{equation*}
 		\item[\oxarrow] We then refine the mesh in the elements where the indicator is larger. We can also adapt a \textbf{D\"orfler marking} strategy.
 	\end{itemize} 
